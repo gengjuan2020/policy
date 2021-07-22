@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+{% block sbgl %}
+    active
+{% endblock %}
+{% block user %}
+    {{ user }}
+{% endblock %}
+{% block body %}
+<br>
+<div class="container-fluid">
+
+    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
+        增加
+    </button>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">类型添加</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <span style="color: red">目前支持SSH,管理方式需大写</span><br>
+
+                    <div class="input-group mb-3">
+
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">&nbsp;&nbsp;管理方式&nbsp;&nbsp;</span>
+                        </div>
+
+                        <input id="dev_mgt" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button id="sumbit" type="button" class="btn btn-primary" data-dismiss="modal">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button id="sc" type="button" class="btn btn-danger" data-toggle="modal">
+        删除
+    </button>
+</div>
+
+<div style="height: 5px"></div>
+<div class="container-fluid">
+    <table class="table table-bordered text-center">
+        <thead>
+        <tr>
+            <th><input type="checkbox" id="check_all" autocomplete="off"></th>
+            <th scope="col">序号</th>
+            <th scope="col">管理方式</th>
+        </tr>
+        </thead>
+        <tbody id="check_DG" >
+        {% for foo in type_sb %}
+            <tr>
+                <td><input type="checkbox"  autocomplete="off"></td>
+                <td id="xz"></td>
+                <td id="type">{{ foo.type_sb }}</td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item">
+                <a class="page-link" href="?page=1" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% for i in page.page_range %}
+                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+            {% endfor %}
+            <li class="page-item">
+                <a class="page-link" href="#" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="#" aria-label="Next">
+                    <span aria-hidden="true">共{{ page.num_pages }}页</span>
+                </a>
+            </li>
+        </ul>
+
+    </nav>
+
+</div>
+
+{% endblock %}
+{% block js %}
+
+
+<script>
+
+    {#增加设备#}
+    $(function () {
+       $("[id='xz']").each(function (i,obj) {
+           $(obj).text(i+1)
+
+       });
+    });
+    
+    $(function () {
+        Notiflix.Report.Init();
+        $('#sumbit').click(function () {
+            var mgt = $('#dev_mgt').val();
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            $.ajax({
+                url:"{% url 'app:dev_mgt' %}",
+                data:{'csrfmiddlewaretoken':csrftoken,'mgt':mgt},
+                type: "post",
+                success:function (data) {
+                    if(data.result=="ok"){
+                        Notiflix.Report.Success( '添加成功', ' <br><br>', 'Click' );
+                        $('#NXReportButton').click(function () {
+                            window.location.reload();
+                        });
+                    }
+
+                }
+            });
+
+        });
+    });
+
+
+    {#增加复选框#}
+    $(function () {
+        $("#check_all").click(function () {
+            var isChecked = $("#check_all").prop("checked");
+            $("#check_DG input").prop("checked", isChecked);
+        });
+        $("#check_DG input").click(function () {
+            var allLength = $("#check_DG input").length;
+            var checkedLength = $("#check_DG input:checked").length;
+            if(allLength == checkedLength){
+                $("#check_all").prop("checked",true);
+            }else {
+                $("#check_all").prop("checked",false);
+            }
+
+        });
+
+    });
+
+    {#删除表格#}
+    $(function () {
+        $("#sc").click(function () {
+            var ids=[];
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            ($("tbody input:checked").parent().siblings("[id='type']")).each(function (i,obj) {
+                ids[i]=$(obj).text()
+
+            });
+            console.log(ids);
+            if (ids.length>0){
+                $.ajax({
+                    url:"{% url 'app:dev_mgt_del' %}",
+                    data:{"ids":ids,"csrfmiddlewaretoken":csrftoken},
+                    type:"post",
+                    dataType:"json",
+                    success:function (data) {
+                        console.log(data)
+                        if(data.result == "ok"){
+                            Notiflix.Report.Success( '删除成功', ' <br><br>', 'Click' );
+                            $('#NXReportButton').click(function () {
+                                window.location.reload();
+                            });
+                        }else {
+                            Notiflix.Report.Failure( '删除失败', '<br><br>', 'Click' );
+                            $('#NXReportButton').click(function () {
+                                window.location.reload();
+                            });
+                        }
+                    }
+
+                });
+            }
+            else {
+                Notiflix.Report.Failure( '请选择删除项', '<br><br>', 'Click' );
+                $('#NXReportButton').click(function () {
+                    window.location.reload();
+                });
+            }
+
+        });
+
+    });
+</script>
+{% endblock js %}
+</body>
+</html>

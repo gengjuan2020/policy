@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block xgj %}
+    active
+{% endblock %}
+{% block title %}
+    IP查询
+{% endblock %}
+
+{% block user %}
+    {{ user }}
+{% endblock %}
+
+{% block body %}
+    <div style="height: 100px"></div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4" id='ip_location'>
+            </div>
+            <div class="col-lg-4 d-flex justify-content-center">
+                <span>🌐地理位置<span id="dlwz"></span></span>
+            </div>
+
+            <div class="col-lg-4">
+            </div>
+        </div>
+    </div>
+        <div style="height: 5px"></div>
+
+    <div class="container">
+            <div class="form-inline d-flex justify-content-center" >
+                <input class="form-control" type="search" placeholder="Search" style="width: 50%;" >
+                <button id='ip_search'   class="btn btn-outline-secondary my-2 my-sm-0 " type="submit">🔍搜索</button>
+            </div>
+    </div>
+
+{% endblock %}
+{% block js %}
+  <script>
+      $(function () {
+          $('#ip_search').click(function () {
+              var ip = $("[type='search']").val();
+              var regip = /^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/;
+              if(regip.exec(ip)!= null){
+                  if (ip!=0){
+                      $.ajax({
+                          url:'/index/ip_location/',
+                          data:{'ip':ip},
+                          type:'get',
+                          dataType:"json",
+                          success:function (data) {
+
+                              $('#dlwz').text(':' + data.location)
+
+                          },
+
+                      });
+
+                  }else {
+                      $('#dlwz').text('')
+                      alert('请输入需要查询的IP');
+                  }
+
+              }else {
+                  alert('IP地址输入错误，请重新输入')
+              }
+
+
+
+
+
+          });
+
+
+      });
+
+  </script>
+{% endblock %}
+  </body>
+</html>

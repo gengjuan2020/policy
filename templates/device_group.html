@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+{% block sbgl %}
+    active
+{% endblock %}
+{% block user %}
+    {{ user }}
+{% endblock %}
+{% block body %}
+<br>
+<div class="container-fluid">
+    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
+        增加
+    </button>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">设备添加</h5>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+                <span aria-hidden="true">组名不能为数字</span>
+                    {% csrf_token %}
+                    <div class="input-group mb-3 ">
+                        <span class="input-group-text" id="inputGroup-sizing-default">关联名称</span>
+                        <input id="gl_name" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+
+                    <div class="input-group mb-3 ">
+                        <span class="input-group-text" id="inputGroup-sizing-default">&nbsp;&nbsp;设备IP&nbsp;&nbsp;</span>
+                        <select id="src_dev" class="form-control" style="height: 150px" multiple="5">
+                            {% for i in dev %}
+                                <option class='bg-light' value="{{ i.dev_ip }}">{{ i.dev_ip }}[{{ i.dev_name }}]</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="input-group mb-3  d-flex justify-content-around">
+                        <div role="group" aria-label="Basic example" >
+                            <button id='add_all' type="button" class="btn btn-info">增加全部</button>
+                            <button id='add' type="button" class="btn btn-success">增加</button>
+                            <button id='del' type="button" class="btn btn-danger">删除</button>
+                            <button id='del_all' type="button" class="btn btn-info">删除全部</button>
+                        </div>
+                    </div>
+                    <div class="input-group mb-3 ">
+                        <span class="input-group-text" id="inputGroup-sizing-default">&nbsp;&nbsp;关联组&nbsp;&nbsp;</span>
+                        <select id='dst_dev' class="form-control" style="height: 150px" multiple="5">
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button id="sumbit" type="button" class="btn btn-primary" data-dismiss="modal">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button  type="button" class="btn btn-danger" data-toggle="modal" data-target="#scbg">
+        删除
+    </button>
+    <div class="modal fade" id="scbg" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">提示</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    你确定需要删除？
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button id="sc" type="button" class="btn btn-primary " data-dismiss="modal">确认删除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="height: 5px"></div>
+
+    <div class="container-fluid" >
+
+        <div class="card bg-light text-dark">
+            <div class="card-header text-center">关联设备组</div>
+        </div>
+
+    </div>
+
+<div class="container-fluid" >
+    <table style="border-collapse:collapse; border: 1px solid #1b1e21;width: 100%">
+        <tr>
+            <td>
+
+                <div class="row">
+                    {% for i,v in group.items %}
+                        <div class="col-lg-4 d-flex justify-content-center">
+                            <div class="card border-success mb-3" style="max-width: 18rem; top: 10px; width: 100%">
+                                <div class="card-header ">
+                                    <div class="row" id="scz">
+                                        <div class="col-lg-6 zm" id="group_name">{{ i }}</div>
+                                        <div class="col-lg-6 d-flex justify-content-end"><input type="checkbox" autocomplete="off" style="height: 20px;width: 20px"></div>
+
+                                    </div>
+
+
+                                </div>
+
+                                <div class="card-body text-success">
+                                    {% for x in v %}
+
+                                        <p class="card-text">{{ x }}</p>
+
+
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                        </div>
+                    {% endfor %}
+                </div>
+            </td>
+
+        </tr>
+
+    </table>
+</div>
+{% endblock %}
+
+{% block js %}
+
+
+<script>
+    $(function () {
+        $("[id='xz']").each(function (i,obj) {
+            $(obj).text(i+1)
+
+        });
+    });
+
+    {#增加复选框#}
+    {#$(function () {#}
+    {#    $("#check_all").click(function () {#}
+    {#        var isChecked = $("#check_all").prop("checked");#}
+    {#        $("#check_DG input").prop("checked", isChecked);#}
+    {#    });#}
+    {#    $("#check_DG input").click(function () {#}
+    {#        var allLength = $("#check_DG input").length;#}
+    {#        var checkedLength = $("#check_DG input:checked").length;#}
+    {#        if(allLength == checkedLength){#}
+    {#            $("#check_all").prop("checked",true);#}
+    {#        }else {#}
+    {#            $("#check_all").prop("checked",false);#}
+    {#        }#}
+    {##}
+    {#    });#}
+    {##}
+    {#});#}
+
+    {#获取选择复选框并删除#}
+    $(function () {
+        Notiflix.Report.Init();
+        $("#sc").click(function () {
+            var ids=[];
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            ($("#scz input:checked").parent().siblings('[id="group_name"]')).each(function (i) {
+                ids[i]=$(this).text()
+
+            });
+            console.log(ids);
+            if (ids.length>0){
+                $.ajax({
+                    url:"/index/device_group/del/",
+                    data:{"ids":ids,"csrfmiddlewaretoken":csrftoken},
+                    type:"post",
+                    dataType:"json",
+                    success:function (data) {
+                        if(data.result == "ok"){
+                             Notiflix.Report.Success( '删除成功', ' <br><br>', 'Click' );
+                                $('#NXReportButton').click(function () {
+                                    window.location.reload();
+                                });
+                        }else {
+                             Notiflix.Report.Failure( '删除失败', ' <br><br>', 'Click' );
+                                $('#NXReportButton').click(function () {
+                                    window.location.reload();
+                                });
+                        }
+
+                    },
+
+                });
+            }
+            else {
+                alert("请选中要删除的项")
+            }
+
+        });
+
+    });
+    //穿越框
+    $(function () {
+        //选择全部项
+        $('#add_all').click(function () {
+            $('#src_dev>option').appendTo($('#dst_dev'))
+
+        });
+        //删除全部
+        $('#del_all').click(function () {
+            $('#dst_dev>option').appendTo($('#src_dev'));
+        });
+        //选择单个
+        $('#add').click(function () {
+            $('#src_dev>option:selected').appendTo($('#dst_dev'));
+
+        });
+        //删除单个
+
+        $('#del').click(function () {
+            $('#dst_dev>option:selected').appendTo($('#src_dev'));
+
+        });
+    });
+
+    $(function () {
+        $('#sumbit').click(function () {
+            group_name = $('#gl_name').val();
+            csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            var name = [];
+            $('.zm').each(function (i) {
+                name[i]=$(this).text()
+            });
+
+            console.log(name.length);
+            console.log(name[1]);
+            if(name.length==0){
+                var group_ip =[];
+
+                $("#dst_dev>option").each(function (i) {
+                    group_ip[i]=$(this).attr("value")
+                });
+
+                $.ajax({
+                    url:'/index/device_group/',
+                    data:{'csrfmiddlewaretoken':csrftoken,'name':group_name,'group':group_ip},
+                    type:'post',
+                    dataType: 'json',
+                    success:function (result) {
+
+                        if(result.result=='error'){
+                            Notiflix.Report.Failure( '提交失败', '<br><br>', 'Click' );
+                           $('#NXReportButton').click(function () {
+                               window.location.reload();
+                           });
+                        }else {
+                             Notiflix.Report.Success( '提交成功', ' <br><br>', 'Click' );
+                                $('#NXReportButton').click(function () {
+                                    window.location.reload();
+                                });
+                        }
+
+
+                    },
+
+                });
+            }else {
+                for (var i=0;i<name.length;i++){
+                    if(name[i]==group_name){
+                        alert('组名重复，请重新提交')
+                    }else {
+                        var group_ip =[];
+
+                        $("#dst_dev>option").each(function (i) {
+                            group_ip[i]=$(this).attr("value")
+                        });
+
+                        $.ajax({
+                            url:'/index/device_group/',
+                            data:{'csrfmiddlewaretoken':csrftoken,'name':group_name,'group':group_ip},
+                            type:'post',
+                            dataType: 'json',
+                            success:function (result) {
+
+                                if(result.result=='error'){
+                                    Notiflix.Report.Failure( '提交失败', '<br><br>', 'Click' );
+                                    $('#NXReportButton').click(function () {
+                                        window.location.reload();
+                                    });
+                                }else {
+                                    Notiflix.Report.Success( '提交成功', ' <br><br>', 'Click' );
+                                    $('#NXReportButton').click(function () {
+                                        window.location.reload();
+                                    });
+                                }
+
+
+                            },
+
+                        });
+                    }
+                }
+
+            }
+
+
+
+
+        });
+
+
+
+    });
+
+
+
+</script>
+{% endblock %}
+</body>
+</html>

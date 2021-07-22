@@ -1,0 +1,340 @@
+{% extends 'base.html' %}
+{% block title %}
+    一键封堵
+{% endblock %}
+{% block yjfd %}
+    active
+{% endblock %}
+{% block user %}
+    {{ user }}
+{% endblock %}
+{% block wfd %}
+    {{ wfd_sum }}
+{% endblock %}
+
+{% block body %}
+<br>
+
+
+<div style="height: 5px"></div>
+<div class="container-fluid">
+    <table class="table table-bordered">
+        <thead>
+        <tr style="text-align: center">
+        <th style="width: 70px;text-align: center" ><input type="checkbox" id="check_all"></th>
+        <th style="width: 70px;text-align: center" scope="col" >序号</th>
+        <th style="width: 40%;text-align: center" scope="col">关联组</th>
+        <th scope="col">操作</th>
+        </tr>
+        </thead>
+
+        <tbody id="check_DG">
+        {% for i in group_dev %}
+            <tr style="text-align: center">
+                <td style="width: 70px;text-align: center" ><input type="checkbox" ></td>
+                <td style="width: 70px;text-align: center" id="xz"></td>
+                <td style="width: 30%;text-align: center" >
+                    <button  style="width: 30%" type="button" class="btn btn-info">{{ i.group_name_id}}</button>
+                </td>
+                <td>
+                    <div role="group" aria-label="Basic example">
+                        <button id='ipfd' type="button" class="btn btn-primary" data-toggle="modal" data-target="#{{ i.group_name_id }}">IP封堵</button>
+                        <div class="modal fade" id="{{ i.group_name_id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">IP封堵</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% csrf_token %}
+                                        <span style="color: red">多个IP之间请输入&</span><br>
+                                        <div style="height: 70%" class="input-group mb-3 ">
+                                            <span class="input-group-text" >封堵IP</span>
+                                            <textarea  class="form-control "></textarea>
+
+                                        </div>
+                                        <div class="input-group mb-3">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text" id="inputGroup-sizing-default">关联组</span>
+                                            </div>
+                                            <select class="form-control" >
+                                                <option value=''>{{ i.group_name_id }}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                                        <button  type="button" class="btn btn-primary fdip" data-dismiss="modal">提交</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#{{ i.group_name_id|add:"x" }}">编辑</button>
+                        <div class="modal fade" id="{{ i.group_name_id|add:"x" }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">编辑</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% csrf_token %}
+                                        <div class="input-group mb-3 ">
+                                            <span class="input-group-text" id="inputGroup-sizing-default">关联名称</span>
+                                            <input id="gl_name" type="text" value="{{ i.group_name_id }}" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                                        </div>
+
+                                        <div class="input-group mb-3 ">
+                                            <span class="input-group-text" id="inputGroup-sizing-default">&nbsp;&nbsp;设备IP&nbsp;&nbsp;</span>
+                                            <select id="src_dev" class="form-control src_dev" style="height: 150px" multiple="5">
+                                                {% for c in dev %}
+                                                    <option class='bg-light' value="{{ c.dev_ip }}">{{ c.dev_ip }}[{{ c.dev_name }}]</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="input-group mb-3  d-flex justify-content-around">
+                                            <div role="group" aria-label="Basic example" >
+                                                <button ='add_all' type="button" class="btn btn-info add_all">增加全部</button>
+                                                <button id='add' type="button" class="btn btn-success add">增加</button>
+                                                <button id='del' type="button" class="btn btn-danger del">删除</button>
+                                                <button id='del_all' type="button" class="btn btn-info del_all">删除全部</button>
+                                            </div>
+                                        </div>
+                                        <div class="input-group mb-3 ">
+                                            <span class="input-group-text" id="inputGroup-sizing-default">&nbsp;&nbsp;关联组&nbsp;&nbsp;</span>
+                                            <select id='dst_dev' class="form-control dst_dev" style="height: 150px" multiple="5">
+
+                                                {% for x,v in group.items %}
+                                                    {% if x == i.group_name_id  %}
+                                                        {% for b in v %}
+                                                            {% for d in dev %}
+                                                                {% if b == d.dev_ip %}
+                                                                    <option class='bg-light' value="{{ b }}">{{ b }}[{{ d.dev_name }}]</option>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        {% endfor %}
+                                                    {% endif %}
+
+                                                {% endfor %}
+
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                                        <button  type="button" class="btn btn-primary tj" data-dismiss="modal">提交</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button data-toggle="modal" data-target="#sclx" type="button" class="btn btn-danger ">删除</button>
+                        <div class="modal fade" id="sclx" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">提示</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body" style="color: red">
+                                        你确定需要删除？
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                                        <button type="button" class="btn btn-primary sc" data-dismiss="modal">确认删除</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+        {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+{% endblock %}
+
+
+
+
+{% block js %}
+<script>
+
+    {#增加设备#}
+    $(function () {
+       $("[id='xz']").each(function (i,obj) {
+           $(obj).text(i+1)
+
+       });
+    });
+    {#删除关联组#}
+    $(function () {
+        Notiflix.Report.Init();
+        $(".sc").click(function () {
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            var id= $(this).parent().parent().parent().parent().parent().parent().siblings().find('button').text();
+
+            console.log(id);
+            $.ajax({
+                url:"{% url 'app:policy_group_del' %}",
+                type:'POST',
+                data:{'csrfmiddlewaretoken':csrftoken,'group':id},
+                success:function (data) {
+                    if(data.result=='ok'){
+                        Notiflix.Report.Success( '删除成功', ' <br><br>', 'Click' );
+                        $('#NXReportButton').click(function () {
+                            window.location.reload();
+                        });
+                    }
+                }
+
+            });
+        });
+
+
+    });
+
+
+
+        //穿越框
+    $(function () {
+        //选择全部项
+        $('.add_all').click(function () {
+            $(this).parent().parent().prev().find('option').appendTo($(this).parent().parent().next().find('select'));
+
+
+        });
+        //删除全部
+        $('.del_all').click(function () {
+            $(this).parent().parent().next().find('option').remove();
+
+        });
+        //选择单个
+        $('.add').click(function () {
+            $(this).parent().parent().prev().find('option:selected').appendTo($(this).parent().parent().next().find('select'));
+
+        });
+        //删除单个
+
+        $('.del').click(function () {
+            $(this).parent().parent().next().find('option:selected').remove();
+
+        });
+    });
+
+
+    {#增加复选框#}
+    $(function () {
+        $("#check_all").click(function () {
+            var isChecked = $("#check_all").prop("checked");
+            $("#check_DG input").prop("checked", isChecked);
+        });
+        $("#check_DG input").click(function () {
+            var allLength = $("#check_DG input").length;
+            var checkedLength = $("#check_DG input:checked").length;
+            if(allLength == checkedLength){
+                $("#check_all").prop("checked",true);
+            }else {
+                $("#check_all").prop("checked",false);
+            }
+
+        });
+
+    });
+    //获取修改之后的数据
+    $(function () {
+        $('.tj').click(function () {
+            ip = [];
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            $(this).parent().siblings().eq(1).children().eq(4).find('option').each(function (i, obj) {
+                ip[i] = $(obj).attr('value')
+            });
+            console.log(ip);
+            name = $(this).parent().parent().parent().parent().parent().parent().parent().children().eq(2).find('button').text();
+            console.log(name);
+            $.ajax({
+                url:"{% url 'app:policy_group_edit' %}",
+                data:{'csrfmiddlewaretoken':csrftoken,'name':name,'ip':ip},
+                type:'post',
+                success:function () {
+                       Notiflix.Report.Success( '修改成功', ' <br><br>', 'Click' );
+                            $('#NXReportButton').click(function () {
+                                $(location).attr('href',"{% url 'app:policy' %}");
+                            });
+
+                }
+
+            });
+
+
+
+
+        });
+    });
+
+    //获取封堵IP
+    //初始化提示插件
+
+
+    $(function () {
+        Notiflix.Loading.Init({
+				{#clickToClose:true#}
+			});
+        $('.fdip').click(function () {
+            var ip=$(this).parent().prev().find('textarea').val();
+            var name = $(this).parent().prev().find('option').text();
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            console.log(ip);
+            console.log(name);
+
+            $.ajax({
+                url:"{% url 'app:policy' %}",
+                data:{'csrfmiddlewaretoken':csrftoken,'name':name,'ip':ip},
+                type:'post',
+                beforeSend:function(){
+                    Notiflix.Loading.Standard();
+                },
+                success:function (data) {
+                    $('#NotiflixLoadingWrap').remove();
+                    {#var result = $.parseJSON(jsonData);#}
+                    console.log(data)
+                    if(data.result=='ok'){
+                        Notiflix.Report.Success( 'Success', ' <br><br>', 'Click' );
+                            $('#NXReportButton').click(function () {
+                                $(location).attr('href',"{% url 'app:policy' %}");
+                            });
+                    }else {
+                        Notiflix.Report.Failure( '封堵失败', ' <br><br>', 'Click' );
+                        $('#NXReportButton').click(function () {
+                            window.location.reload();
+                        });
+                    }
+
+
+                }
+            });
+
+        });
+
+
+    });
+
+</script>
+{% endblock %}
+</body>
+</html>

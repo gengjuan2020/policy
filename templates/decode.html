@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% block title %} 解码小工具{% endblock %}
+{% block xgj %}
+    active
+{% endblock %}
+{% block user %}
+    {{ user }}
+{% endblock %}
+
+{% block body %}
+    <div style="height: 100px"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-5">
+                <div class="input-group" style="width: 100%;height: 300px">
+                    <textarea id='src_code' class="form-control" placeholder="请粘贴需要转换的字符串"></textarea>
+                </div>
+            </div>
+            <div class="col-lg-2 ">
+                {% csrf_token %}
+                <div style="height: 10%;"></div>
+                <div clas="row">
+                    <div class="d-flex justify-content-center">
+                        <button id='code16' type="button" class="btn btn-outline-secondary " style="height:100%;width:100%;" >&lt;16进制解码&gt;</button>
+                    </div>
+
+                </div>
+                <div style="height: 10px;"></div>
+                <div clas="row">
+                    <div class="d-flex justify-content-center">
+                        <button id='unicode' type="button" class="btn btn-outline-secondary " style="height:100%;width:100%;" >&lt;Unicode解码&gt;</button>
+                    </div>
+
+                </div>
+                <div style="height: 10px;"></div>
+                <div clas="row">
+                    <div class="d-flex justify-content-center">
+                        <button id='urlcode' type="button" class="btn btn-outline-secondary " style="height:100%;width:100%;" >&lt;URL解码&gt;</button>
+                    </div>
+
+                </div>
+                <div style="height: 10px;"></div>
+                <div clas="row">
+                    <div class="d-flex justify-content-center" >
+                        <button id='base64' type="button" class="btn btn-outline-secondary " style="height:100%;width:100%;" >&lt;Base64解码&gt;</button>
+                    </div>
+
+                </div>
+                <div style="height: 50px;"></div>
+                <div clas="row">
+                    <div class="d-flex justify-content-center" >
+                        <button id='clear' type="button" class="btn btn-outline-secondary " style="height:100%;width:100%;" >&lt;全部清除&gt;</button>
+                    </div>
+
+                </div>
+
+
+            </div>
+            <div class="col-lg-5">
+                <div class="input-group" style="width: 100%;height: 300px">
+
+                    <textarea id='dst_code' class="form-control" placeholder="转换后的结果"></textarea>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+
+{% endblock %}
+
+{% block js %}
+
+<script>
+    //url解码
+    $(function () {
+        $('#urlcode').click(function () {
+            var undata = $('#src_code').val();
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            if(undata.length > 0){
+                $.ajax({
+                    url:'/index/decode/',
+                    data:{'undata':undata,"csrfmiddlewaretoken":csrftoken,"lx":'urlcode'},
+                    type:'post',
+                    dataType:'json',
+                    success: function (result) {
+                        $('#dst_code').text(result.result)
+
+                    }
+
+                });
+            }else {
+                alert('请输入需要转换的数据')
+            }
+        });
+    });
+    //base64解码
+    $(function () {
+        $('#base64').click(function () {
+            var undata = $('#src_code').val();
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            if(undata.length > 0){
+
+                $.ajax({
+                    url:'/index/decode/',
+                    data:{'undata':undata,"csrfmiddlewaretoken":csrftoken,'lx':'base64'},
+                    type:'post',
+                    dataType:'json',
+                    success: function (result) {
+                        $('#dst_code').text(result.result)
+                    }
+
+                });
+
+            }else {
+                alert('请输入需要转换的数据')
+            }
+        });
+    });
+    //Unicode解码
+    $(function () {
+        $('#unicode').click(function () {
+            var undata = $('#src_code').val();
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            if(undata.length > 0){
+                $.ajax({
+                    url:'/index/decode/',
+                    data:{'undata':undata,"csrfmiddlewaretoken":csrftoken,"lx":'unicode'},
+                    type:'post',
+                    dataType:'json',
+                    success: function (result) {
+                        $('#dst_code').text(result.result)
+
+                    }
+
+                });
+            }else {
+                alert('请输入需要转换的数据')
+            }
+        });
+    });
+        //16进制解码
+    $(function () {
+        $('#code16').click(function () {
+            var undata = $('#src_code').val();
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            if(undata.length > 0){
+                $.ajax({
+                    url:'/index/decode/',
+                    data:{'undata':undata,"csrfmiddlewaretoken":csrftoken,"lx":'code16'},
+                    type:'post',
+                    dataType:'json',
+                    success: function (result) {
+                        $('#dst_code').text(result.result)
+
+                    }
+
+                });
+            }else {
+                alert('请输入需要转换的数据')
+            }
+        });
+    });
+
+
+    //清除全部
+    $(function () {
+        $("#clear").click(function () {
+
+            $('#src_code').val('');
+            $('#dst_code').val('');
+
+        });
+    });
+
+
+</script>
+
+{% endblock %}
+
+
+
+  </body>
+</html>

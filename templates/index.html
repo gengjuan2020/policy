@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block index %}
+    active
+{% endblock %}
+{% block user %}
+    {{ user }}
+{% endblock %}
+{% block body %}
+    <br>
+    <div class="container-fluid ">
+        <div class="row">
+            <div class="col-lg-6" >
+                <div class="row">
+                    <div class="col-lg-6 index.html">
+                        <div class="card" style="width: 18rem;">
+                            <div class="card-body bg-light">
+                                <h5 class="card-title text-center">设备总数</h5>
+                                <h1 class="card-text text-success text-center">{{ sum }}</h1>
+                                <div class="text-center">
+                                    <a href="/index/device_add/" class="btn btn-primary">设备详情</a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                       <div class="col-lg-6">
+                        <div class="card" style="width: 18rem;">
+                            <div class="card-body bg-light">
+                                <h5 class="card-title text-center">设备组</h5>
+                                <h1 class="card-text text-success text-center">{{ group }}</h1>
+                                <div class="text-center">
+                                    <a href="{% url 'app:dev_group' %}" class="btn btn-primary">设备详情</a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="card" style="width: 18rem;">
+                            <div class="card-body bg-light">
+                                <h5 class="card-title text-center">上报数量</h5>
+                                <h1 class="card-text  text-center" style="color: red">{{ sb_sum }}</h1>
+                                <div class="text-center">
+                                    <a href="{% url 'app:monitor' %}" class="btn btn-primary">上报详情</a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="card" style="width: 18rem;">
+                            <div class="card-body bg-light">
+                                <h5 class="card-title text-center">封堵总数</h5>
+                                <h1 class="card-text text-break text-center">{{ fd_sum }}</h1>
+                                <div class="text-center">
+                                    <a href="{% url 'app:monitor' %}" class="btn btn-primary">封堵详情</a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}
+        <!-- Optional JavaScript -->
+
+
+  </body>
+</html>

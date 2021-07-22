@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% block title %}
+    脚本定制
+{% endblock %}
+{% block jbdz %}
+    active
+{% endblock %}
+{% block user %}
+    {{ user }}
+{% endblock %}
+
+
+
+{% block body %}
+    <br>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm">
+                <div class="alert alert-dark" role="alert">
+                    基于Python语言的脚本编写
+                </div>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">脚本名称</span>
+                    </div>
+                    <input id='name' class="form-control" type="text" placeholder=".py的文件名，文件名必须与脚本函数名一致" >
+                </div>
+                <br>
+                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#staticBackdrop">
+                    <i class="fa fa-question-circle-o" aria-hidden="true">帮助文档</i>
+                </button>
+                <br>
+
+                <!-- Modal -->
+                <div class="modal fade" id="staticBackdrop" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="staticBackdropLabel">脚本编写规则</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <code>
+                                    <p>#脚本名称需要和函数名称一致</p>
+                                    <p>#导入脚本编写使用的第三方库或者本地库</p>
+                                    <p>#整体脚本中不能包含汉字</p>
+                                    <p>#参数说明，ip为设备IP，user为用户名，passwd为设备密码，blackip为封堵IP（类型为list）</p>
+                                    <p>#模板（启明星辰防火墙）</p>
+                                    <pre>
+import paramiko,time
+def qmxc_fw(ip,user,passwd,blackip):
+    try:
+        transport = paramiko.Transport((ip, 22))
+        transport.connect(username=user, password=passwd)
+        connect = ('Connect %s Success' % ip)
+        print(connect.center(50, '*'))
+        channel = transport.open_session()
+        channel.get_pty()
+        channel.invoke_shell()
+        time.sleep(1)
+        channel.send('en\n')
+        channel.send('config t\n')
+        for i in blackip:
+            channel.send('blacklist-ip %s timeout 0 \n'%i)
+            time.sleep(0.5)
+        channel.close()
+        transport.close()
+    except:
+        print('%sconnect Error' % ip)
+        raise Exception('connect Error ')
+                                    </pre>
+
+
+                                </code>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+                <div >
+
+                    <textarea style="height:400px" id='code' name='code' class="form-control" placeholder="代码中不能包含中文" aria-label="With textarea"></textarea>
+
+                </div>
+
+                {% csrf_token %}
+                <input id='tj' type="button" value="提交">
+            </div>
+
+            <div class="col-sm">
+                <div class="alert alert-dark" role="alert">
+                    脚本列表
+                </div>
+                <div class="input-group">
+                    <input id='cxnr' type="text" class="form-control" placeholder="脚本搜索"  aria-describedby="button-addon2">
+                    <div class="input-group-append">
+                        <button id="cx" class="btn btn-outline-secondary" type="button" id="button-addon2">搜索</button>
+                    </div>
+                </div>
+                <br>
+                <table class="table table-bordered text-center" >
+                    <thead>
+                    <tr>
+                        <th style="width: 4em"><input type="checkbox" id="check_all" autocomplete="off"></th>
+                        <th>脚本名称</th>
+                    </tr>
+                    </thead>
+                    <tbody id="check_DG">
+                    {% for i in js_name %}
+                        <tr >
+                            <td><input type="checkbox" autocomplete="off"></td>
+                            <td>{{ i.name }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <input id='ckjb' type="button" value="查看">
+                <input id='scjb' type="button" value="删除">
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}
+
+
+
+
+{% block js %}
+{#    <script type="text/javascript" src="/static/js/Codemirror/mode/python/python.js"></script>#}
+{#    <script type="text/javascript" src="/static/js/Codemirror/lib/codemirror.js"></script>#}
+    <script>
+
+        {#添加脚本#}
+        Notiflix.Report.Init();
+        $(function () {
+            $('#tj').click(function () {
+                var code=$('#code').val();
+                console.log(code)
+                var name = $('#name').val()
+                csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                $.ajax({
+                    url:"{% url 'app:js_code' %}",
+                    type:'POST',
+                    data:{'csrfmiddlewaretoken':csrftoken,'code':code,'name':name},
+                    success:function (data) {
+                        if(data.result=='ok'){
+                            Notiflix.Report.Success( '添加成功', ' <br><br>', 'Click' );
+                            $('#NXReportButton').click(function () {
+                                $(location).attr('href',"{% url 'app:js_code' %}");
+                            });
+                        }
+
+
+                    }
+                });
+
+            });
+
+
+        });
+        {#排序#}
+        $(function () {
+            $("[id='xz']").each(function (i,obj) {
+                $(obj).text(i+1)
+
+            });
+        });
+
+        {#增加复选框#}
+        $(function () {
+            $("#check_all").click(function () {
+                var isChecked = $("#check_all").prop("checked");
+                $("#check_DG input").prop("checked", isChecked);
+            });
+            $("#check_DG input").click(function () {
+                var allLength = $("#check_DG input").length;
+                var checkedLength = $("#check_DG input:checked").length;
+                if(allLength == checkedLength){
+                    $("#check_all").prop("checked",true);
+                }else {
+                    $("#check_all").prop("checked",false);
+                }
+
+            });
+
+        });
+        {#查看脚本#}
+        $(function () {
+            $('#ckjb').click(function () {
+                num = $('tbody input:checked').parent().next();
+                var js_name=$('tbody input:checked').parent().next().text();
+                csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                console.log(js_name,num)
+                if(num.length>1 || num.length<1){
+                    Notiflix.Report.Failure( '选择错误', ' <br><br>', 'Click' );
+                    $('#NXReportButton').click(function () {
+                        $(location).attr('href',"{% url 'app:js_code' %}");
+                    });
+                }else{
+                    $.ajax({
+                        url:"{% url 'app:js_view' %}",
+                        type:'post',
+                        data:{
+                            'name':js_name,
+                            'csrfmiddlewaretoken':csrftoken,
+                        },
+                        success:function (data) {
+                            console.log(data);
+                            js_data=JSON.parse(data.result)
+                            data=js_data[0].fields.neirong
+                            $('#code').val(data)
+
+                        }
+                    });
+                }
+
+
+            });
+
+        });
+        {#删除脚本#}
+        $(function () {
+            $('#scjb').click(function () {
+                num = $('tbody input:checked').parent().next();
+                var name=[];
+                $('tbody input:checked').parent().next().each(function (i) {
+                    name[i]=$(this).text()
+                });
+                console.log(name)
+                csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                if(num.length<1){
+                    Notiflix.Report.Failure( '未选择删除项', ' <br><br>', 'Click' );
+                    $('#NXReportButton').click(function () {
+                        $(location).attr('href',"{% url 'app:js_code' %}");
+                    });
+                }else {
+                    $.ajax({
+                        url:"{% url 'app:js_del' %}",
+                        type:'post',
+                        data:{
+                            'name':name,
+                            'csrfmiddlewaretoken':csrftoken,
+                        },
+                        success:function (data) {
+                            if(data.result=='ok'){
+                                Notiflix.Report.Success( '删除成功', ' <br><br>', 'Click' );
+                                $('#NXReportButton').click(function () {
+                                    $(location).attr('href',"{% url 'app:js_code' %}");
+                                });
+                            }
+
+                        }
+                    });
+                }
+
+            });
+        });
+        $(function () {
+            $('#cx').click(function () {
+                var name = $('#cxnr').val()
+                $.ajax({
+                    url:'{% url "app:js_view" %}',
+                    type:'get',
+                    data:{'name':name},
+                    success:function (data) {
+                        $('tbody tr').remove();
+                        js_data=JSON.parse(data.result);
+                        console.log(js_data);
+                        for(var i=0;i<js_data.length;i++){
+                            console.log(js_data[i]);
+                            html='<tr >\n' +
+                                '                    <td><input type="checkbox" autocomplete="off"></td>\n' +
+                                '                    <td>'+ js_data[i].fields.name + '</td>\n' +
+                                '                </tr>'
+
+                            $('tbody').append(html);
+                        }
+
+
+
+                    }
+                })
+            });
+        });
+
+
+    </script>
+
+
+
+
+    </script>
+
+{% endblock %}
+</body>
+</html>

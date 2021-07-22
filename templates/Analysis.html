@@ -1,0 +1,620 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    威胁分析
+{% endblock %}
+{% block user %}
+    {{ user }}
+{% endblock %}
+
+{% block wxfx %}
+    active
+{% endblock %}
+
+{% block style %}
+
+          table{
+
+              table-layout:fixed;/* 只有定义了表格的布局算法为fixed，下面td的定义才能起作用。 */
+          }
+          .csssz{
+              width:100%;
+              word-break:keep-all;/* 不换行 */
+              white-space:nowrap;/* 不换行 */
+              overflow:hidden;/* 内容超出宽度时隐藏超出部分的内容 */
+              text-overflow:ellipsis;/* 当对象内文本溢出时显示省略标记(...) ；需与overflow:hidden;一起使用。*/
+          }
+{% endblock %}
+{% block body %}
+    <div class="container-fluid">
+        <br>
+        <div class="row">
+            <div class="col-lg-6">
+                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
+                    增加
+                </button>
+                <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">攻击上报</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                {% csrf_token %}
+
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="inputGroup-sizing-default">事件名称</span>
+                                    </div>
+                                    <input id="name" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                                </div>
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="inputGroup-sizing-default">监测设备</span>
+                                    </div>
+                                    <input id="dev" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                                </div>
+                                <div id="dev_type" class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="inputGroup-sizing-default">&nbsp;&nbsp;IP区域&nbsp;&nbsp;</span>
+                                    </div>
+                                    <input id="src_area" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                                </div>
+                                <div class="input-group mb-3 ">
+                                    <span class="input-group-text" id="inputGroup-sizing-default srcip">攻击源IP</span>
+                                    <input id="srcip" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                                </div>
+                                                                <div class="input-group mb-3 ">
+                                    <span class="input-group-text" id="inputGroup-sizing-default">&nbsp;&nbsp;目标IP&nbsp;&nbsp;</span>
+                                    <input id="dstip" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                                </div>
+
+
+                                <div class="input-group mb-3" >
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text" id="inputGroup-sizing-default" >攻击载荷</span>
+                                    </div>
+                                    <textarea id="payload" type="" class="form-control" aria-label="Sizing example input" placeholder="最大不超过1000字符" aria-describedby="inputGroup-sizing-default"></textarea>
+
+                                </div>
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                                <button id="sumbit" type="button" class="btn btn-primary" data-dismiss="modal">提交</button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="sc" type="button" class="btn btn-danger" data-toggle="modal" data-target='#scsb'>
+                    删除
+                </button>
+                <div class="modal fade" id="scsb" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">提示</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body" style="color: red">
+                                你确定需要删除？
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                                <button id="qrsc" type="button" class="btn btn-primary " data-dismiss="modal">确认删除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="sc" type="button" class="btn btn-primary" data-toggle="modal"data-target="#zhuangtai">
+                    分析处置
+                </button>
+                <div class="modal fade" id="zhuangtai" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog ">
+                        <div class="modal-content ">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">分析结果</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <input type="radio" name="status" value="1">
+                                处置封堵
+                                <input type="radio" name="status" value="2"> 继续观察
+                            </div>
+                            <div class="input-group mb-3 " >
+                                <textarea id="fxyj" class="form-control" aria-label="Sizing example input" placeholder="分析意见" aria-describedby="inputGroup-sizing-default"></textarea>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                                <button id='qd' type="button" class="btn btn-primary">确定</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button id="dc" type="button" class="btn btn-info" >
+                    导出全部
+                </button>
+            </div>
+
+
+            <div class="col-lg-6 d-flex justify-content-end">
+                <input class="form-control" style="width: 50%;" type="search" placeholder="搜索" aria-label="Search">
+                <button class="btn btn-outline-secondary my-2 my-sm-0 " id="chaxun">查询</button>
+            </div>
+        </div>
+    </div>
+
+<div style="height: 5px"></div>
+<div class="container-fluid">
+    <table class="table table-bordered  text-center" id="tableWidth tb_3">
+        <thead>
+        <tr>
+            <th style="width:50px"><input  type="checkbox" id="check_all" autocomplete="off"></th>
+            <th scope="col" class="text-center" style="width:6%" >序号</th>
+            <th scope="col" >事件名称</th>
+            <th scope="col">监测设备</th>
+            <th scope="col" style="width:80px">区域</th>
+            <th scope="col">攻击IP</th>
+            <th scope="col">目标IP</th>
+            <th scope="col" class="text-center">攻击载荷</th>
+            <th scope="col" class="text-center" style="width:200px">分析建议</th>
+            <th style="width:10%" class='text-center' scope="col">分析结果</th>
+        </tr>
+        </thead>
+        <tbody id="check_DG">
+        {% for foo in page_data %}
+            <tr>
+                <td ><input type="checkbox" autocomplete="off"></td>
+                <td id="xz" class="csssz text-center" ></td>
+                <td  id='sjid' class="csssz " title='{{ foo.log_name }}' value="{{ foo.id }}">{{ foo.log_name }}</td>
+                <td class="csssz">{{ foo.log_dev }}</td>
+                <td title='{{ foo.log_area }}' class="csssz">{{ foo.log_area }}</td>
+                <td class="csssz">{{ foo.log_srcip }}</td>
+                <td class="csssz"> {{foo.log_dstip }}</td>
+                <td  style="width:100px" class='text-center' >
+                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#pyload{{ foo.id }}">
+                        详情
+                    </button>
+                    <div class="modal fade" id="pyload{{ foo.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title " id="exampleModalLabel" >攻击载荷</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body" style="color: red;height:100%">
+                                    {{ foo.log_payload}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td style="width: 188px;" class='text-center' >
+                    <button type="button" class="btn btn-light" data-toggle="modal" data-target="#fenxi{{ foo.id }}">
+                        详情
+                    </button>
+                    <div class="modal fade" id="fenxi{{ foo.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title " id="exampleModalLabel" >分析意见</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body" style="color: red;height:100%">
+                                    {{ foo.log_fenxi}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </td>
+                <td class='text-center' style="width: 10%">
+                    <button type="button" class="btn btn-info status">{{foo.log_status}}</button>
+                </td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item">
+                    <a class="page-link" href="?page=1" aria-label="Previous" style="background: #313944;color: white">
+                        <span aria-hidden="true">首页</span>
+                    </a>
+                </li>
+                {% if page_data.has_previous %}
+                    <li class="page-item" id="xyy"><a class="page-link" href="?page={{ page_data.previous_page_number}}" style="background: #313944;color: white">上一页</a></li>
+                {% endif %}
+                {% for i in page.page_range %}
+                    {% if i < 6 %}
+                        <li class="page-item ymlist"><a class="page-link" href="?page={{ i }}" style="background: #313944;color: white">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if page_data.has_next or page_data.number == page.num_pages%}
+                    <li class="page-item" id="xyy"><a class="page-link" href="#" style="background: #313944;color: white">.......</a></li>
+                {% endif %}
+
+                <li class="page-item" id="xyy"><a class="page-link" href="?page={{ page.num_pages }}" style="background: #313944;color: white">{{ page.num_pages }}</a></li>
+
+
+                <li class="page-item">
+                    {% if page_data.has_next %}
+                        <li class="page-item" id="xyy"><a class="page-link" href="?page={{ page_data.next_page_number}}" style="background: #313944;color: white">下一页</a></li>
+                    {% endif %}
+
+                <a class="page-link" href="?page={{ page.num_pages }}" aria-label="Next" style="background: #313944;color: white">
+                    <span aria-hidden="true">尾页</span>
+                </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#" aria-label="Next" style="background: #313944;color: white">
+                        <span aria-hidden="true">当前{{ page_data.number }}页</span>
+                    </a>
+                </li>
+            </ul>
+
+        </nav>
+
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+
+
+    
+
+    <script>
+        $(function () {
+            $("[id='xz']").each(function (i,obj) {
+                $(obj).text(i+1)
+
+            });
+        });
+        //删除表格
+
+        $(function () {
+            Notiflix.Report.Init();
+           $('#qrsc').click(function () {
+               var ids=[];
+               var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+               $('tbody input:checked').parent().siblings("[id='sjid']").each(function (i) {
+                   ids[i] = $(this).attr('value');
+
+               });
+               $.ajax({
+                   url:"{% url 'app:wxfx_del' %}",
+                   type:'post',
+                   data:{'csrfmiddlewaretoken':csrftoken,'id':ids},
+                   success:function (data) {
+                       if(data.result=='ok'){
+                            Notiflix.Report.Success( '删除成功', ' <br><br>', 'Click' );
+                                $('#NXReportButton').click(function () {
+                                    window.location.reload();
+                                });
+                       }else {
+                           Notiflix.Report.Failure( '选择删除项', '<br><br>', 'Click' );
+                           $('#NXReportButton').click(function () {
+                               $(location).attr('href',"{% url 'app:wxfx' %}");
+                           });
+                       }
+
+                   }
+
+               });
+           });
+        });
+        {#增加复选框#}
+        $(function () {
+            $("#check_all").click(function () {
+                var isChecked = $("#check_all").prop("checked");
+                $("#check_DG input").prop("checked", isChecked);
+            });
+            $("#check_DG input").click(function () {
+                var allLength = $("#check_DG input").length;
+                var checkedLength = $("#check_DG input:checked").length;
+                if(allLength == checkedLength){
+                    $("#check_all").prop("checked",true);
+                }else {
+                    $("#check_all").prop("checked",false);
+                }
+
+            });
+
+        });
+        //增加上报事件
+        $(function () {
+            $("#sumbit").click(function () {
+                sname = $("#name").val();
+                dev = $("#dev").val();
+                csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                src_area = $("#src_area").val();
+                srcip = $("#srcip").val();
+                dstip = $("#dstip").val();
+                payload=$("#payload").val();
+                console.log(sname,dev,src_area,srcip,dstip,payload);
+                $.ajax({
+                    url:'{% url 'app:wxfx'%}',
+                    type:'post',
+                    data:{'csrfmiddlewaretoken':csrftoken,
+                        'name':sname,
+                        'dev':dev,
+                        'src_area':src_area,
+                        'srcip':srcip,
+                        'dstip':dstip,
+                        'payload':payload,
+
+                    },
+                    success:function (data) {
+                        if(data.result=='ok'){
+                             Notiflix.Report.Success( '上报成功', ' <br><br>', 'Click' );
+                                $('#NXReportButton').click(function () {
+                                    window.location.reload();
+                                });
+                        }else {
+                             Notiflix.Report.Failure( '上报失败', '<br><br>', 'Click' );
+                           $('#NXReportButton').click(function () {
+                               $(location).attr('href',"{% url 'app:wxfx' %}");
+                           });
+                        }
+
+
+                    }
+
+                });
+
+            });
+
+        });
+    //查询
+        $(function () {
+            $('#chaxun').click(function () {
+                cx = $('[type="search"]').val();
+                csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                $.ajax({
+                    url:"{% url 'app:wxfx_search' %}",
+                    data:{'csrfmiddlewaretoken':csrftoken,'cx':cx},
+                    type:'post',
+                    cache:false,
+                    dataType:'json',
+                    success:function (result) {
+
+                        $('tbody tr').remove();
+                        $('table').next().remove()
+                        for(var i=0;i<result.length;i++){
+                            console.log(result[i].fields);
+                            console.log(result[i].fields.log_time);
+                            var nian = result[i].fields.log_time.substring(0,10);
+                            var fen = result[i].fields.log_time.substring(11,16);
+                            var time = nian +' '+ fen;
+
+                            console.log(nian,fen,time);
+                            html = '          <tr>\n' +
+                                '                <td><input type="checkbox" ></td>\n' +
+                                '                <td id="xz"></td>\n' +
+                                '                <td id=\'sjid\' class="csssz" title="'+result[i].fields.log_name+'"value=\"'+result[i].pk+'\">'+result[i].fields.log_name +'</td>\n' +
+                                '\n' +
+                                '<td class="csssz">'+result[i].fields.log_dev+'</td>\n'+
+                                '<td class="csssz">'+result[i].fields.log_area+'</td>\n'+
+                                '<td class="csssz">'+result[i].fields.log_srcip +'</td>\n'+
+                                '<td class="csssz">'+result[i].fields.log_dstip+'</td>\n'+
+                                '<td  style="width:100px">\n'+
+                                '<button type="button" class="btn btn-light" data-toggle="modal" data-target="#pyload'+result[i].pk+'">\n'+
+                                '详情\n'+
+                                '</button>\n'+
+                                '                  <div class="modal fade" id="pyload'+result[i].pk+'" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">\n' +
+                                '                        <div class="modal-dialog">\n' +
+                                '                            <div class="modal-content">\n' +
+                                '                                <div class="modal-header">\n' +
+                                '                                    <h5 class="modal-title" id="exampleModalLabel">提示</h5>\n' +
+                                '                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">\n' +
+                                '                                        <span aria-hidden="true">&times;</span>\n' +
+                                '                                    </button>\n' +
+                                '                                </div>\n' +
+                                '                                <div class="modal-body" style="color: red">\n' +
+                                result[i].fields.log_payload+
+                                '                                </div>\n' +
+                                '                            </div>\n' +
+                                '                        </div>\n' +
+                                '                    </div>\n' +
+                                ' </td>\n' +
+                                '<td style="width: 188px;" class=\'text-center\' >\n' +
+                                '<button type="button" class="btn btn-light" data-toggle="modal" data-target="#fenxi' +
+                                result[i].pk+
+                                '">\n' +
+                                '详情' +
+                                '</button>\n' +
+                                '<div class="modal fade" id="fenxi'+ result[i].pk +
+                                '" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">\n' +
+                                '<div class="modal-dialog">\n' +
+                                '<div class="modal-content">\n' +
+                                '<div class="modal-header">\n' +
+                                '<h5 class="modal-title " id="exampleModalLabel" >分析意见</h5>\n' +
+                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">\n' +
+                                '<span aria-hidden="true">&times;</span>\n' +
+                                '</button>\n' +
+                                '</div>\n' +
+                                '<div class="modal-body" style="color: red;height:100%">' +
+                                     result[i].fields.log_fenxi+
+                                '</div>\n' +
+                                '</div>\n' +
+                                '</div>\n' +
+                                '</div>\n' +
+                                '</td>\n' +
+                                '                <td> \n'+
+                                '<button type="button" class="btn btn-info status">'+result[i].fields.log_status+'</button>\n'+
+                                "</td>\n"+
+                                '            </tr>'
+                            $('tbody').append(html);
+                            $('.status').each(function () {
+                                status = $(this).text();
+                                console.log(status)
+                                if(status=='未封堵'){
+                                    $(this).parent().parent().css('background-color','#C0C0C0')
+                                }else {
+                                    $(this).attr('class','btn btn-success status')
+                                }
+
+                            });
+
+                            $("[id='xz']").each(function (i,obj) {
+                                $(obj).text(i+1)
+
+                            });
+
+                        }
+
+                    }
+                });
+
+            });
+        });
+        //修改状态
+        $(function () {
+            $('#qd').click(function () {
+                var ids=[];
+                csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                $('tbody input:checked').parent().siblings("[id='sjid']").each(function (i) {
+                    ids[i] = $(this).attr('value');
+                });
+                 var val=$('input:radio[name="status"]:checked').attr('value');
+                 var fxyj=$('#fxyj').val();
+                 console.log(fxyj)
+
+
+                if(ids.length==0){
+                    Notiflix.Report.Failure( '选择修改项', '<br><br>', 'Click' );
+                    $('#NXReportButton').click(function () {
+                        window.location.reload();
+                    });
+                }else if(ids.length>=0){
+
+                    $.ajax({
+                        url:'{% url 'app:wxfx_status' %}',
+                        data:{'csrfmiddlewaretoken':csrftoken,'id':ids,'val':val,'fxyj':fxyj},
+                        type:'post',
+                        success:function (data) {
+                            if(data.result=='ok'){
+                                Notiflix.Report.Success( '修改成功', ' <br><br>', 'Click' );
+                                $('#NXReportButton').click(function () {
+                                    window.location.reload();
+                                });
+                            }
+                        }
+                    });
+
+                }
+
+
+            });
+
+        });
+
+
+        //导出
+        $(function () {
+            $('#dc').click(function () {
+                var ids=[];
+                var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                $('tbody input:checked').parent().siblings("[id='sjid']").each(function (i) {
+                    ids[i] = $(this).attr('value');
+
+                });
+                if(ids.length==0){
+                    $.ajax({
+                        url:'{% url 'app:wxfx_export' %}',
+                        data:{'csrfmiddlewaretoken':csrftoken,'len':0},
+                        type:'post',
+                         success:function (response, status, request) {
+                            var disp = request.getResponseHeader('Content-Disposition');
+                            console.log(disp)
+                            if (disp && disp.search('attachment') != -1) {
+                                var form = $('<form action="{% url "app:wxfx_export" %}" method="post"></form>');
+                                $('body').append(form);
+                                form.submit(); //自动提交
+
+                            }
+
+
+                        }
+                    });
+                }else if(ids.length>0){
+                    $.ajax({
+                        url:'{% url 'app:wxfx_export' %}',
+                        data:{'csrfmiddlewaretoken':csrftoken,'len':ids.length,'id':ids},
+                        type:'post',
+                        success:function (response, status, request) {
+                            var disp = request.getResponseHeader('Content-Disposition');
+                            console.log(disp)
+                            if (disp && disp.search('attachment') != -1) {
+                                console.log(12)
+                                var form = $('<form action="{% url "app:wxfx_export" %}" method="post"></form>');
+                                $('body').append(form);
+                                form.submit(); //自动提交
+                            }
+
+
+                        }
+                    });
+                }
+
+
+            });
+
+        });
+
+        
+
+
+        {#$(function () {#}
+        {#    $('#srcip').blur(function () {#}
+        {#        var csrftoken = $("[name=csrfmiddlewaretoken]").val();#}
+        {#        var srcip = $('#srcip').val();#}
+        {#        $.ajax({#}
+        {#            url:'{% url "app:monitor_check_cf" %}',#}
+        {#            data:{'csrfmiddlewaretoken':csrftoken,'ip':srcip},#}
+        {#            type:'post',#}
+        {#            success:function (data) {#}
+        {#                if(data.result=='error'){#}
+        {#                     Notiflix.Report.Failure( 'IP重复', '<br><br>', 'Click' );#}
+        {#                   $('#NXReportButton').click(function () {#}
+        {#                       $(location).attr('href',"{% url 'app:wxfx' %}");#}
+        {#                   });#}
+        {#                }#}
+        {#            }#}
+        {#        });#}
+        {##}
+        {#    });#}
+        {#});#}
+
+        $(function() {
+            $("table").colResizable({
+                liveDrag: true,//实时显示滑动位置
+                gripInnerHtml: "<div class='grip'></div>",
+                postbackSafe:false,//刷新后保留之前的拖拽宽度
+            });
+        })
+    </script>
+
+
+{% endblock %}
+
+
+  </body>
+</html>

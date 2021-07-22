@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+    封堵记录
+{% endblock %}
+{% block fdjl %}
+    active
+{% endblock %}
+
+
+{% block style %}
+
+          table{
+
+              table-layout:fixed;/* 只有定义了表格的布局算法为fixed，下面td的定义才能起作用。 */
+          }
+          .csssz{
+              width:100%;
+              word-break:keep-all;/* 不换行 */
+              white-space:nowrap;/* 不换行 */
+              overflow:hidden;/* 内容超出宽度时隐藏超出部分的内容 */
+              text-overflow:ellipsis;/* 当对象内文本溢出时显示省略标记(...) ；需与overflow:hidden;一起使用。*/
+          }
+{% endblock %}
+{% block user %}
+    {{ user }}
+{% endblock %}
+{% block body %}
+    <div class="container-fluid">
+        <br>
+        <div class="row">
+            <div class="col-lg-6">
+                {% csrf_token %}
+                <button id="dc" type="button" class="btn btn-info" >
+                    导出全部
+                </button>
+            </div>
+            <div class="col-lg-6 d-flex justify-content-end">
+                <input class="form-control" style="width: 50%;" type="search" placeholder="搜索" aria-label="Search">
+                <button class="btn btn-outline-secondary my-2 my-sm-0 " id="chaxun">查询</button>
+            </div>
+        </div>
+    </div>
+
+<div style="height: 5px"></div>
+<div class="container-fluid">
+    <table class="table table-bordered text-center" id="tableWidth tb_3">
+        <thead>
+        <tr>
+
+            <th scope="col" class="text-center" style="width:6%" >序号</th>
+            <th scope="col">封堵IP</th>
+            <th scope="col" class="text-center" style="width:200px">封堵时间</th>
+        </tr>
+        </thead>
+        <tbody id="check_DG">
+        {% for foo in page_data %}
+            <tr>
+                <td id="xz" class="csssz text-center" ></td>
+                <td  id='sjid' class="csssz " title='{{ foo.log_ip }}' value="{{ foo.id }}">{{ foo.log_ip }}</td>
+                <td style="width: 188px;" class='text-center' > {{foo.log_time|date:"Y-m-d H:i" }}</td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item">
+                    <a class="page-link" href="?page=1" aria-label="Previous" style="background: #313944;color: white">
+                        <span aria-hidden="true">首页</span>
+                    </a>
+                </li>
+                {% if page_data.has_previous %}
+                    <li class="page-item" id="xyy"><a class="page-link" href="?page={{ page_data.previous_page_number}}" style="background: #313944;color: white">上一页</a></li>
+                {% endif %}
+                {% for i in page.page_range %}
+                    {% if i < 6 %}
+                        <li class="page-item ymlist"><a class="page-link" href="?page={{ i }}" style="background: #313944;color: white">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if page_data.has_next or page_data.number == page.num_pages%}
+                    <li class="page-item" id="xyy"><a class="page-link" href="#" style="background: #313944;color: white">.......</a></li>
+                {% endif %}
+
+                <li class="page-item" id="xyy"><a class="page-link" href="?page={{ page.num_pages }}" style="background: #313944;color: white">{{ page.num_pages }}</a></li>
+
+
+                <li class="page-item">
+                    {% if page_data.has_next %}
+                        <li class="page-item" id="xyy"><a class="page-link" href="?page={{ page_data.next_page_number}}" style="background: #313944;color: white">下一页</a></li>
+                    {% endif %}
+
+                <a class="page-link" href="?page={{ page.num_pages }}" aria-label="Next" style="background: #313944;color: white">
+                    <span aria-hidden="true">尾页</span>
+                </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#" aria-label="Next" style="background: #313944;color: white">
+                        <span aria-hidden="true">当前{{ page_data.number }}页</span>
+                    </a>
+                </li>
+            </ul>
+
+        </nav>
+
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+
+
+    
+
+    <script>
+        $(function () {
+            $("[id='xz']").each(function (i,obj) {
+                $(obj).text(i+1)
+
+            });
+        });
+
+    //查询
+        $(function () {
+            $('#chaxun').click(function () {
+                cx = $('[type="search"]').val();
+                csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                $.ajax({
+                    url:"{% url 'app:fdjl_search' %}",
+                    data:{'csrfmiddlewaretoken':csrftoken,'cx':cx},
+                    type:'post',
+                    cache:false,
+                    dataType:'json',
+                    success:function (result) {
+
+                        $('tbody tr').remove();
+                        $('table').next().remove()
+                        for(var i=0;i<result.length;i++){
+                            {#console.log(result[i].fields);#}
+                            console.log(result[i].fields.log_time);
+                            var nian = result[i].fields.log_time.substring(0,10);
+                            var fen = result[i].fields.log_time.substring(11,16);
+                            var time = nian +' '+ fen;
+
+                            console.log(nian,fen,time);
+                            html = '          <tr>\n' +
+                                '                <td id="xz"></td>\n' +
+                                '                <td id=\'sjid\' class="csssz" title="'+result[i].fields.log_name+'"value=\"'+result[i].pk+'\">'+result[i].fields.log_ip +'</td>\n' +
+                                ' </td>\n' +
+                                '                <td style="width: 188px;"> '+ time+'</td>\n' +
+                                '                <td> \n'+
+
+                                "</td>\n"+
+                                '            </tr>'
+                            $('tbody').append(html);
+                            $('.status').each(function () {
+                                status = $(this).text();
+                                console.log(status)
+                                if(status=='未封堵'){
+                                    {#$(this).parent().parent().css('background-color','#C0C0C0')#}
+                                }else {
+                                    $(this).attr('class','btn btn-success status')
+                                }
+
+                            });
+
+                            $("[id='xz']").each(function (i,obj) {
+                                $(obj).text(i+1)
+
+                            });
+
+                        }
+
+                    }
+                });
+
+            });
+        });
+
+
+        //导出
+        $(function () {
+            $('#dc').click(function () {
+                var ids=[];
+                var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                $('tbody input:checked').parent().siblings("[id='sjid']").each(function (i) {
+                    ids[i] = $(this).attr('value');
+
+                });
+                if(ids.length==0){
+                    $.ajax({
+                        url:'{% url 'app:fdjl_export' %}',
+                        data:{'csrfmiddlewaretoken':csrftoken,'len':0},
+                        type:'post',
+                         success:function (response, status, request) {
+                            var disp = request.getResponseHeader('Content-Disposition');
+                            console.log(disp)
+                            if (disp && disp.search('attachment') != -1) {
+                                var form = $('<form action="{% url "app:fdjl_export" %}" method="post"></form>');
+                                $('body').append(form);
+                                form.submit(); //自动提交
+
+                            }
+
+
+                        }
+                    });
+                }else if(ids.length>0){
+                    $.ajax({
+                        url:'{% url 'app:fdjl_export' %}',
+                        data:{'csrfmiddlewaretoken':csrftoken,'len':ids.length,'id':ids},
+                        type:'post',
+                        success:function (response, status, request) {
+                            var disp = request.getResponseHeader('Content-Disposition');
+                            console.log(disp)
+                            if (disp && disp.search('attachment') != -1) {
+                                console.log(12)
+                                var form = $('<form action="{% url "app:fdjl_export" %}" method="post"></form>');
+                                $('body').append(form);
+                                form.submit(); //自动提交
+                            }
+
+
+                        }
+                    });
+                }
+
+
+            });
+
+        });
+
+        //表格拖动
+        $(function() {
+            $("table").colResizable({
+                liveDrag: true,//实时显示滑动位置
+                gripInnerHtml: "<div class='grip'></div>",
+                postbackSafe:false,//刷新后保留之前的拖拽宽度
+            });
+        })
+
+
+
+
+
+
+    </script>
+
+
+{% endblock %}
+
+
+  </body>
+</html>

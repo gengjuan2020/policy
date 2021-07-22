@@ -1,0 +1,281 @@
+{% extends 'base.html' %}
+{% block sbgl %}
+    active
+{% endblock %}
+{% block user %}
+    {{ user }}
+{% endblock %}
+
+{% block body %}
+<br>
+<div class="container-fluid">
+
+    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#exampleModal">
+        增加
+    </button>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">设备添加</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% csrf_token %}
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">&nbsp;&nbsp;用户名&nbsp;&nbsp;</span>
+                        </div>
+                        <input id="dev_user" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                     <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">&nbsp;&nbsp;密&nbsp;&nbsp;码&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                        </div>
+                        <input id="dev_password" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                    <div class="input-group mb-3 ">
+                        <span class="input-group-text" id="inputGroup-sizing-default">&nbsp;&nbsp;设备IP&nbsp;&nbsp;</span>
+                        <input id="ip" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">设备名称</span>
+                        </div>
+                        <input id="dev_name" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+                    </div>
+                    <div id="dev_type" class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">管理方式</span>
+                        </div>
+
+                        <select  class="form-control" >
+                            {% for i in dev_mgt %}
+                                <option value='{{ i.type_sb }}'>{{ i.type_sb }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div id="xx" class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">设备类型</span>
+                        </div>
+                        <select  class="form-control" >
+                            {% for i in type_all %}
+                                <option id="dev_type" value='{{ i.d_type }}'>{{ i.d_type }}</option>
+                            {% endfor %}
+                        </select>
+
+                    </div>
+                  <div id="js_name" class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="inputGroup-sizing-default">关联脚本</span>
+                        </div>
+                        <select  class="form-control" >
+                            {% for i in code_all %}
+                                <option value='{{ i.name }}'>{{ i.name }}</option>
+                            {% endfor %}
+                        </select>
+
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    <button id="sumbit" type="button" class="btn btn-primary" data-dismiss="modal">提交</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <button id="sc" type="button" class="btn btn-danger" data-toggle="modal">
+        删除
+    </button>
+</div>
+
+<div style="height: 5px"></div>
+<div class="container-fluid">
+    <table class="table table-bordered text-center" >
+        <thead>
+        <tr>
+            <th><input type="checkbox" id="check_all" autocomplete="off"></th>
+            <th scope="col">序号</th>
+            <th scope="col">设备名称</th>
+            <th scope="col">设备IP</th>
+            <th scope="col">管理方式</th>
+            <th scope="col">设备类型</th>
+            <th scope="col">关联脚本</th>
+            <th scope="col">添加时间</th>
+        </tr>
+        </thead>
+        <tbody id="check_DG">
+        {% for foo in page_data %}
+            <tr>
+                <td><input type="checkbox" autocomplete="off" ></td>
+                <td id="xz"></td>
+                <td id="">{{ foo.dev_name }}</td>
+                <td id="xzip">{{ foo.dev_ip }}</td>
+                <td id="">{{ foo.dev_mgt_id }}</td>
+                <td>{{ foo.dev_type_id }}</td>
+                <td>{{ foo.dev_code_id }}</td>
+                <td> {{foo.dev_time }}</td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+
+
+
+</div>
+
+{% endblock %}
+
+{% block js %}
+
+<script>
+
+    {#增加设备#}
+    $(function () {
+       $("[id='xz']").each(function (i,obj) {
+           $(obj).text(i+1)
+
+       });
+    });
+    
+    $(function () {
+        Notiflix.Report.Init();
+        $("#sumbit").click(function () {
+            ip = $("#ip").val();
+            dev_name = $("#dev_name").val();
+            csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            dev_password = $("#dev_password").val();
+            dev_user = $("#dev_user").val();
+            dev_type=$("#xx option:selected").text();
+            dev_mgt = $("#dev_type option:selected").text();
+            js_name=$("#js_name option:selected").text();
+            var regip = /^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$/;
+            console.log(js_name)
+            if(regip.exec(ip)!= null){
+                $.ajax({
+                    url:"/index/device_add/dev/",
+                    type:'post',
+                    data:{
+                        "dev_ip":ip,
+                        "dev_user":dev_user,
+                        "dev_password":dev_password,
+                        "csrfmiddlewaretoken":csrftoken,
+                        "dev_type":dev_type,
+                        "dev_name":dev_name,
+                        "type_sb":dev_mgt,
+                        "js_name":js_name,
+                    },
+                    dataType:"json",
+                    success:function (result) {
+                        console.log(result);
+
+                        if (result.result== 'ok'){
+
+                             Notiflix.Report.Success( '添加成功', ' <br><br>', 'Click' );
+                                $('#NXReportButton').click(function () {
+                                    window.location.reload();
+                                });
+
+
+                        }else {
+                             Notiflix.Report.Failure( '添加失败', '<br><br>', 'Click' );
+                           $('#NXReportButton').click(function () {
+                               window.location.reload();
+                           });
+                        }
+
+                    }
+
+                });
+
+            }else if(ip.length==0){
+                 Notiflix.Report.Failure( '设备地址不能为空', '<br><br>', 'Click' );
+                           $('#NXReportButton').click(function () {
+                               window.location.reload();
+                           });
+
+            } else {
+                 Notiflix.Report.Failure( 'IP格式错误', '<br><br>', 'Click' );
+                           $('#NXReportButton').click(function () {
+                               window.location.reload();
+                           });
+            }
+
+        });
+
+    });
+    {#增加复选框#}
+    $(function () {
+        $("#check_all").click(function () {
+            var isChecked = $("#check_all").prop("checked");
+            $("#check_DG input").prop("checked", isChecked);
+        });
+        $("#check_DG input").click(function () {
+            var allLength = $("#check_DG input").length;
+            var checkedLength = $("#check_DG input:checked").length;
+            if(allLength == checkedLength){
+                $("#check_all").prop("checked",true);
+            }else {
+                $("#check_all").prop("checked",false);
+            }
+
+        });
+
+    });
+
+    {#删除表格#}
+    $(function () {
+        $("#sc").click(function () {
+            var ids=[];
+            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            ($("tbody input:checked").parent().siblings("[id='xzip']")).each(function (i,obj) {
+                ids[i]=$(obj).text()
+            });
+            console.log(ids)
+            if (ids.length>0){
+                $.ajax({
+                    url:"/index/device_add/del/",
+                    data:{"ids":ids,"csrfmiddlewaretoken":csrftoken},
+                    type:"post",
+                    dataType:"json",
+                    success:function (data) {
+                        console.log(data)
+                        if(data.result == "ok"){
+                            Notiflix.Report.Success( '删除成功', ' <br><br>', 'Click' );
+                            $('#NXReportButton').click(function () {
+                                window.location.reload();
+                            });
+                        }else {
+                            Notiflix.Report.Failure( '删除失败', '<br><br>', 'Click' );
+                            $('#NXReportButton').click(function () {
+                                window.location.reload();
+                            });
+                        }
+                    }
+
+                });
+            }
+            else {
+                Notiflix.Report.Failure( '选择删除项', '<br><br>', 'Click' );
+                $('#NXReportButton').click(function () {
+                    window.location.reload();
+                });
+            }
+
+        });
+
+    });
+</script>
+{% endblock %}
+</body>
+</html>
